@@ -1,10 +1,13 @@
 package com.rajesh;
 
+import javafx.beans.binding.When;
+
 public class Main {
 
     public static void main(String[] args) {
         Countdown countdown = new Countdown();
-
+//        Countdown countdown1 = new Countdown();
+//        Countdown countdown2 = new Countdown();
         CountdownThread t1 = new CountdownThread(countdown);
         t1.setName("Thread 1");
         CountdownThread t2 = new CountdownThread(countdown);
@@ -16,11 +19,16 @@ public class Main {
     }
 }
 
+//When multiple threads are run with same instance(countdownclass - some work), the instances(countdownclass)
+//instance variable will be shared, i,e it will allocated on the heap and shared. if the variables are local
+//variables on the instances(countdownclass) it will be added to the thread's Stack
+
 class Countdown {
     private int i;
-    public void doCountdown() {
+    // Constructors cannot ne synchronised
+    // current thread will hold it until it finishes and then lets it go
+    public synchronized void doCountdown() {
         String color;
-
 
         switch(Thread.currentThread().getName()) {
             case "Thread 1":
