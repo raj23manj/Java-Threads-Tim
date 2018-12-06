@@ -27,7 +27,8 @@ class Countdown {
     private int i;
     // Constructors cannot ne synchronised
     // current thread will hold it until it finishes and then lets it go
-    public synchronized void doCountdown() {
+    // public synchronized void doCountdown()
+    public  void doCountdown() {
         String color;
 
         switch(Thread.currentThread().getName()) {
@@ -40,11 +41,14 @@ class Countdown {
             default:
                 color = ThreadColor.ANSI_GREEN;
         }
-        //for(int i = 10; i > 0; i--)
-        for(i = 10; i > 0; i--) {
-            System.out.println(color + Thread.currentThread().getName() + " : i = " + i);
-        }
 
+        //synchronized(color) wrong, because it is a local variable
+        synchronized(this) {
+            //for(int i = 10; i > 0; i--)
+            for(i = 10; i > 0; i--) {
+                System.out.println(color + Thread.currentThread().getName() + " : i = " + i);
+            }
+        }
     }
 }
 
