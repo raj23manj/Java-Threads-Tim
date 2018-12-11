@@ -39,7 +39,10 @@ class MyProducer implements Runnable {
         for(String num: nums) {
             try {
                 System.out.println(color + "Adding... " + num);
-                buffer.add(num);
+
+                synchronized (buffer) {
+                    buffer.add(num);
+                }
 
                 Thread.sleep(random.nextInt(2000));
             } catch(InterruptedException e) {
@@ -48,7 +51,10 @@ class MyProducer implements Runnable {
         }
 
         System.out.println(color + "Adding EOF and Exiting...");
-        buffer.add("EOF");
+        synchronized (buffer) {
+            buffer.add("EOF");
+        }
+
     }
 }
 
@@ -65,14 +71,17 @@ class MyConsumer implements Runnable {
     @Override
     public void run() {
         while(true) {
-            if(buffer.isEmpty()){
-                continue;
-            }
+            synchronized (buffer) {
+                if(buffer.isEmpty()){
+                    continue;
+                }
 
-            if(buffer.get(0).equals(EOF)) {
-                System.out.println(color + "Exiting");
-            } else {
-                System.out.println(color + "Removed" + buffer.remove(0));
+                if(buffer.get(0).equals(EOF)) {
+                    System.out.println(color + "Exiting");
+                    break;
+                } else {
+                    System.out.println(color + "Removed" + buffer.remove(0));
+                }
             }
         }
     }
