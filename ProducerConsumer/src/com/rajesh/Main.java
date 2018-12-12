@@ -3,6 +3,9 @@ package com.rajesh;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.rajesh.Main.EOF;
@@ -13,13 +16,23 @@ public class Main {
     public static void main(String[] args) {
         List<String> buffer = new ArrayList(); // not thread safe
         ReentrantLock bufferLock = new ReentrantLock(); // when a thread is holding a lock and enters again it can execute
+
+        // create thread pools, in this case one producer and 2 consumers
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+
         MyProducer producer = new MyProducer(buffer, ThreadColor.ANSI_GREEN, bufferLock);
         MyConsumer consumer1 = new MyConsumer(buffer, ThreadColor.ANSI_PURPLE, bufferLock);
         MyConsumer consumer2 = new MyConsumer(buffer, ThreadColor.ANSI_CYAN, bufferLock);
 
-        new Thread(producer).start();
-        new Thread(consumer1).start();
-        new Thread(consumer2).start();
+//        new Thread(producer).start();
+//        new Thread(consumer1).start();
+//        new Thread(consumer2).start();
+        executorService.execute(producer);
+        executorService.execute(consumer1);
+        executorService.execute(consumer2);
+
+        // will wait untill all scheduled class finishes, shut downs in order
+        executorService.shutdown();
     }
 }
 
