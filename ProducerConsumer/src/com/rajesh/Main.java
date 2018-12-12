@@ -3,9 +3,7 @@ package com.rajesh;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.rajesh.Main.EOF;
@@ -18,7 +16,7 @@ public class Main {
         ReentrantLock bufferLock = new ReentrantLock(); // when a thread is holding a lock and enters again it can execute
 
         // create thread pools, in this case one producer and 2 consumers
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
 
         MyProducer producer = new MyProducer(buffer, ThreadColor.ANSI_GREEN, bufferLock);
         MyConsumer consumer1 = new MyConsumer(buffer, ThreadColor.ANSI_PURPLE, bufferLock);
@@ -30,6 +28,23 @@ public class Main {
         executorService.execute(producer);
         executorService.execute(consumer1);
         executorService.execute(consumer2);
+
+        Future<String> future = executorService.submit(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                System.out.println(ThreadColor.ANSI_RED + "I'M BEING PRINTED FOR THE CALLABLE CLASS");
+                return "This is the callable result";
+            }
+        });
+
+        try {
+            // the main thread hold's until this is resolved
+            System.out.println(future.get());
+        } catch (ExecutionException e) {
+            System.out.println("Something went wrong");
+        } catch (InterruptedException e) {
+            System.out.println("Thread running the task was interrupted");
+        }
 
         // will wait untill all scheduled class finishes, shut downs in order
         executorService.shutdown();
